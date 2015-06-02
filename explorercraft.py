@@ -20,11 +20,14 @@ WOOL_BLACK  = block.Block(35,15)
 
 
 class BarGraph():
-    def __init__(self, x, y, z, height, max_value, block_style):
+    def __init__(self, x, y, z, height, max_value, block_style, mc=None):
         self.position = minecraft.Vec3(x,y,z)
         self.height = height
         self.block_style = block_style
-        self.mc = None
+        if not mc == None:
+            self.mc = mc
+        else:
+            self.mc = minecraft.Minecraft.create()
         self.max_value = max_value
         
     def _scale_value(self, s_min, s_max, t_min, t_max, value):
@@ -63,8 +66,8 @@ class BarGraph():
         self._draw_bar(int(value))
         
 class Thermometer(BarGraph):
-    def __init__(self, x, y, z, height, max_value, block_style):
-        BarGraph.__init__(self, x, y, z, height, max_value, block_style)
+    def __init__(self, x, y, z, height, max_value, block_style, mc=None):
+        BarGraph.__init__(self, x, y, z, height, max_value, block_style, mc)
         self._setup()
 
     def set_block_style(self, block):
@@ -81,7 +84,6 @@ class Thermometer(BarGraph):
 
 
     def _setup(self):
-        self.mc = minecraft.Minecraft.create()
         '''self.mc.setBlocks(
             self.position.x + 3,
             self.position.y - 255,
