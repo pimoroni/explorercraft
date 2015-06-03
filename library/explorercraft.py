@@ -1,6 +1,7 @@
 from mcpi import minecraft, block
 import time
 import threading
+from mcpi.block import *
 
 WOOL        = block.Block(35,0)
 WOOL_ORANGE = block.Block(35,1)
@@ -19,8 +20,8 @@ WOOL_DGREEN = block.Block(35,13)
 WOOL_RED    = block.Block(35,14)
 WOOL_BLACK  = block.Block(35,15)
 
-FACE_TOP    = 1
-FACE_BOTTOM = 0
+BLOCK_TOP    = 1
+BLOCK_BOTTOM = 0
 
 class StoppableThread(threading.Thread):
     def __init__(self):
@@ -91,7 +92,7 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
             self._hit_polling.start()
 
     def _match_key(self, src, tgt):
-        if src == tgt or src == -1:
+        if src == tgt or src == -1 or src == block.Block(-1,-1):
             return True
         return False
 
@@ -100,7 +101,7 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
         for key in self._hit_handlers:
             key_found = True
             for x in range(4):
-                if not _match_key(key[x],find_key[x]):
+                if not self._match_key(key[x],find_key[x]):
                     key_found = False
                     break
             if key_found and callable(self._hit_handlers[key]):
@@ -115,7 +116,7 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
             block_type = self.getBlockWithData(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z)
             key = (block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_type, block_hit.face)
 
-            for handler in _find_handlers(key):
+            for handler in self._find_handlers(key):
                 handler(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_type, block_hit.face)
 
             '''if key in self._hit_handlers and callable(self._hit_handlers[key]):
