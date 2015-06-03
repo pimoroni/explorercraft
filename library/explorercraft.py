@@ -128,17 +128,22 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
         time.sleep(0.01)
 
 
-class BarGraph():
-    '''Draw a bar-chart style bar with a single stack of blocks
-    '''
-    def __init__(self, x, y, z, height, max_value, block_style, mc=None):
-        self.position = minecraft.Vec3(x,y,z)
-        self.height = height
-        self.block_style = block_style
+class ExplorercraftPlugin():
+    def __init__(mc=None):
         if not mc == None:
             self.mc = mc
         else:
             self.mc = MinecraftInstanceHandler.Instance()
+
+class BarGraph(ExplorercraftPlugin):
+    '''Draw a bar-chart style bar with a single stack of blocks
+    '''
+    def __init__(self, x, y, z, height, max_value, block_style, mc=None):
+        ExplorercraftPlugin.__init__(self,mc)
+
+        self.position = minecraft.Vec3(x,y,z)
+        self.height = height
+        self.block_style = block_style
         self.max_value = max_value
         
     def _scale_value(self, s_min, s_max, t_min, t_max, value):
@@ -236,3 +241,35 @@ class Thermometer(BarGraph):
             block.AIR
         )
     
+class Elevator(ExplorercraftPlugin):
+
+    def __init__(self,*args,**kwargs):
+        mc = kwargs.get('mc', None)
+        self.x  = kwargs.get('x',0)
+        self.y  = kwargs.get('y',0)
+        self.z  = kwargs.get('z',0)
+        self.number_of_floors = kwargs.get('number_of_floors',2)
+        self.current_floor = 0
+
+        # Height of floor from ground, including ceiling
+        self.floor_height     = kwargs.get('floor_height', 3)
+        ExplorercraftPlugin.__init__(self,mc)
+
+    def _setup(self):
+        total_height = self.number_of_floors * self.floor_height
+
+        '''
+        Generate the elevator shaft.
+        Should be as high as the number of floors multiplied by the floor height
+        But inset one step into the ground from its origin, to account for the elevator platform
+        '''
+        mc.setBlocks(
+            self.x,self.y-1,self.z,
+            self.x,self.y+total_height+1,self.z,
+            AIR
+        )
+
+    def go_to_floor(self, floor):
+        pass
+
+minecraft = MinecraftInstanceHandler.Instance()
