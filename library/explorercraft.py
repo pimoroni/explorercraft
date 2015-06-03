@@ -88,13 +88,13 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
 
     def _poll(self):
         block_hits = self.events.pollBlockHits()
-        self.events.clearAll()
+        #self.events.clearAll()
         for block_hit in block_hits:
             key = (block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.type)
             if key in self._hit_handlers and callable(self._hit_handlers[key]):
-                self._hit_handlers[key](block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.type)
+                self._hit_handlers[key](block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.face, block_hit.type, block_hit.entityId)
             if (-1,-1,-1,-1) in self._hit_handlers and callable(self._hit_handlers[(-1,-1,-1,-1)]):
-                self._hit_handlers[(-1,-1,-1,-1)](block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.type)
+                self._hit_handlers[(-1,-1,-1,-1)](block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.face, block_hit.type, block_hit.entityId)
         time.sleep(0.01)
 
 
