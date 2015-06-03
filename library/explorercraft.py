@@ -67,7 +67,7 @@ class Singleton:
 class MinecraftInstanceHandler(minecraft.Minecraft):
     def __init__(self):
         minecraft.Minecraft.__init__(self, minecraft.Connection("localhost", 4711))
-        self._hit_handlers = []
+        self._hit_handlers = {}
         self._hit_polling = None
 
     def on_hit(self, *args, **kwargs):
