@@ -1,5 +1,6 @@
 from mcpi import minecraft, block
 import time
+import threading
 
 WOOL        = block.Block(35,0)
 WOOL_ORANGE = block.Block(35,1)
@@ -17,6 +18,33 @@ WOOL_BROWN  = block.Block(35,12)
 WOOL_DGREEN = block.Block(35,13)
 WOOL_RED    = block.Block(35,14)
 WOOL_BLACK  = block.Block(35,15)
+
+class StoppableThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.stop_event = threading.Event()
+        self.daemon = True         
+
+    def start(self):
+        if self.isAlive() == False:
+            self.stop_event.clear()
+            threading.Thread.start(self)
+
+    def stop(self):
+        if self.isAlive() == True:
+            self.stop_event.set()
+            self.join()
+
+class AsyncWorker(StoppableThread):
+    def __init__(self, todo):
+        StoppableThread.__init__(self)
+        self.todo = todo
+
+    def run(self):
+        while self.stop_event.is_set() == False:
+            if self.todo() == False:
+                self.stop_event.set()
+                break
 
 class Singleton:
     def __init__(self, decorated):
@@ -40,6 +68,7 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
     def __init__(self):
         minecraft.Minecraft.__init__(self, minecraft.Connection("localhost", 4711))
         self._hit_handlers = []
+        self._hit_polling = None
 
     def on_hit(self, *args, **kwargs):
         x = kwargs.get('x', -1)
@@ -52,6 +81,22 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
             raise ValueError("Handler function required!")
 
         self._hit_handlers[(x, y, z, block_type)] = handler
+
+        if self._hit_polling = None:
+            self._hit_polling = AsyncWorker(_poll)
+            self._hit_polling.start()
+
+    def _poll(self):
+        block_hits = self.events.pollBlockHits()
+        self.events.clearAll()
+        for block_hit in block_hits:
+            key = (blockHit.pos.x, blockHit.pos.y, blockHit.pos.z, blockHit.type)
+            if key in self._hit_handlers and callable(self._hit_handlers[key]):
+                self._hit_handlers[key].call(blockHit.pos.x, blockHit.pos.y, blockHit.pos.z, blockHit.type)
+            if (-1,-1,-1,-1) in self._hit_handlers and callable(self._hit_handlers[(-1,-1,-1,-1)]):
+                self._hit_handlers[(-1,-1,-1,-1)].call(blockHit.pos.x, blockHit.pos.y, blockHit.pos.z, blockHit.type)
+        time.sleep(0.01)
+
 
 class BarGraph():
     '''Draw a bar-chart style bar with a single stack of blocks
