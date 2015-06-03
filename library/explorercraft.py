@@ -18,8 +18,44 @@ WOOL_DGREEN = block.Block(35,13)
 WOOL_RED    = block.Block(35,14)
 WOOL_BLACK  = block.Block(35,15)
 
+class Singleton:
+    def __init__(self, decorated):
+        self._decorated = decorated
+
+    def Instance(self):
+        try:
+            return self._instance
+        except AttributeError:
+            self._instance = self._decorated()
+            return self._instance
+
+    def __call__(self):
+        raise TypeError('Singletons must be accessed through `Instance()`.')
+
+    def __instancecheck__(self, inst):
+        return isinstance(inst, self._decorated)
+
+@Singleton
+class MinecraftInstanceHandler(minecraft.Minecraft):
+    def __init__(self):
+        minecraft.Minecraft.__init__(self, "localhost", 4711)
+        self._hit_handlers = []
+
+    def on_hit(self, *args, **kwargs):
+        x = kwargs.get('x', -1)
+        y = kwargs.get('y', -1)
+        z = kwargs.get('z', -1)
+        block_type = kwargs.get('block_type', -1)
+        handler = kwargs.get('handler', None)
+
+        if handler == None:
+            raise ValueError("Handler function required!")
+
+        self._hit_handlers[(x, y, z, block_type)] = handler
 
 class BarGraph():
+    '''Draw a bar-chart style bar with a single stack of blocks
+    '''
     def __init__(self, x, y, z, height, max_value, block_style, mc=None):
         self.position = minecraft.Vec3(x,y,z)
         self.height = height
@@ -27,7 +63,7 @@ class BarGraph():
         if not mc == None:
             self.mc = mc
         else:
-            self.mc = minecraft.Minecraft.create()
+            self.mc = MinecraftInstanceHandler.Instance()
         self.max_value = max_value
         
     def _scale_value(self, s_min, s_max, t_min, t_max, value):
@@ -83,17 +119,7 @@ class Thermometer(BarGraph):
         self.mc.player.setPos(self.position.x, self.position.y, self.position.z-30)
 
 
-    def _setup(self):
-        '''self.mc.setBlocks(
-            self.position.x + 3,
-            self.position.y - 255,
-            self.position.z + 3,
-            self.position.x - 3,
-            self.position.y + 255,
-            self.position.z - 30 - 3,
-            block.AIR
-            )'''
-        
+    def _setup(self):        
         self.mc.setBlocks(
             self.position.x - 3,
             self.position.y - 1,

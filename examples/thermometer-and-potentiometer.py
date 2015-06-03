@@ -12,12 +12,12 @@ thermometer.teleport_player()
 potentiometer = explorercraft.BarGraph(1,20,0,50,50,explorercraft.WOOL_GREEN)
 
 while True:
-	value = max(0,min(50,int(explorerhat.analog.two.read() * 10)))
-	potentiometer.update(value)
+    value = max(0,min(50,int(explorerhat.analog.two.read() * 10)))
+    potentiometer.update(value)
 
-	temperature = 25 + (explorerhat.analog.one.read() - 0.75) * 100
-	thermometer.update(analog)
+    temperature = 25 + (explorerhat.analog.one.read() - 0.75) * 100
+    thermometer.update(temperature)
 
-	print("The temperature is {}c and Analog 2 is {}".format(temperature, value))
+    print("The temperature is {}c and Analog 2 is {}".format(temperature, value))
 
-	time.sleep(0.1)
+    time.sleep(0.1)
