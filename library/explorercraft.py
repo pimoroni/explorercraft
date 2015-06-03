@@ -77,33 +77,52 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
         x = kwargs.get('x', -1)
         y = kwargs.get('y', -1)
         z = kwargs.get('z', -1)
-        face = kwargs.get('face', -1)
+        block_type = kwargs.get('block_type', block.Block(-1,-1))
+        face    = kwargs.get('face', -1)
         handler = kwargs.get('handler', None)
 
         if handler == None:
             raise ValueError("Handler function required!")
 
-        self._hit_handlers[(x, y, z, face)] = handler
+        self._hit_handlers[(x, y, z, block_type, face)] = handler
 
         if self._hit_polling == None:
             self._hit_polling = AsyncWorker(self._poll)
             self._hit_polling.start()
 
+    def _match_key(self, src, tgt):
+        if src == tgt or src == -1:
+            return True
+        return False
+
+    def _find_handlers(self, find_key):
+        matching_handlers = []
+        for key in self._hit_handlers:
+            key_found = True
+            for x in range(4):
+                if not _match_key(key[x],find_key[x]):
+                    key_found = False
+                    break
+            if key_found and callable(self._hit_handlers[key]):
+                matching_handlers.append(self._hit_handlers[key])
+        return matching_handlers
+
     def _poll(self):
+        key_all = (-1,-1,-1,block.Block(-1,-1),-1)
         block_hits = self.events.pollBlockHits()
         #self.events.clearAll()
         for block_hit in block_hits:
-            key = (block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.face)
-            block_type = None
+            block_type = self.getBlockWithData(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z)
+            key = (block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_type, block_hit.face)
 
-            if key in self._hit_handlers and callable(self._hit_handlers[key]):
-                block_type = self.getBlockWithData(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z)
+            for handler in _find_handlers(key):
+                handler(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_type, block_hit.face)
+
+            '''if key in self._hit_handlers and callable(self._hit_handlers[key]):
                 self._hit_handlers[key](block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_type, block_hit.face)
 
-            if (-1,-1,-1,-1) in self._hit_handlers and callable(self._hit_handlers[(-1,-1,-1,-1)]):
-                if block_type == None:
-                    block_type = self.getBlockWithData(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z)
-                self._hit_handlers[(-1,-1,-1,-1)](block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_type, block_hit.face)
+            if key_all in self._hit_handlers and callable(self._hit_handlers[key_all]):
+                self._hit_handlers[key_all](block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_type, block_hit.face)'''
 
         time.sleep(0.01)
 
