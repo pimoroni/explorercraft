@@ -1,0 +1,4 @@
+include explorercraft.py
+include setup.py
+include README.md
+include CHANGELOG.txt
