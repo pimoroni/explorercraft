@@ -94,12 +94,15 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
         #self.events.clearAll()
         for block_hit in block_hits:
             key = (block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.face)
-            block_type = self.getBlockWithData(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z)
+            block_type = None
 
             if key in self._hit_handlers and callable(self._hit_handlers[key]):
+                block_type = self.getBlockWithData(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z)
                 self._hit_handlers[key](block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_type, block_hit.face)
 
             if (-1,-1,-1,-1) in self._hit_handlers and callable(self._hit_handlers[(-1,-1,-1,-1)]):
+                if block_type == None:
+                    block_type = self.getBlockWithData(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z)
                 self._hit_handlers[(-1,-1,-1,-1)](block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_type, block_hit.face)
 
         time.sleep(0.01)
