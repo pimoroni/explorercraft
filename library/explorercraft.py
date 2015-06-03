@@ -83,7 +83,7 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
         self._hit_handlers[(x, y, z, block_type)] = handler
 
         if self._hit_polling == None:
-            self._hit_polling = AsyncWorker(_poll)
+            self._hit_polling = AsyncWorker(self._poll)
             self._hit_polling.start()
 
     def _poll(self):
