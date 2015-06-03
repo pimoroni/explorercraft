@@ -90,11 +90,11 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
         block_hits = self.events.pollBlockHits()
         self.events.clearAll()
         for block_hit in block_hits:
-            key = (blockHit.pos.x, blockHit.pos.y, blockHit.pos.z, blockHit.type)
+            key = (block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.type)
             if key in self._hit_handlers and callable(self._hit_handlers[key]):
-                self._hit_handlers[key].call(blockHit.pos.x, blockHit.pos.y, blockHit.pos.z, blockHit.type)
+                self._hit_handlers[key].call(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.type)
             if (-1,-1,-1,-1) in self._hit_handlers and callable(self._hit_handlers[(-1,-1,-1,-1)]):
-                self._hit_handlers[(-1,-1,-1,-1)].call(blockHit.pos.x, blockHit.pos.y, blockHit.pos.z, blockHit.type)
+                self._hit_handlers[(-1,-1,-1,-1)].call(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.type)
         time.sleep(0.01)
 
 
