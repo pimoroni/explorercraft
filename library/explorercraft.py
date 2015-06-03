@@ -92,9 +92,9 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
         for block_hit in block_hits:
             key = (block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.type)
             if key in self._hit_handlers and callable(self._hit_handlers[key]):
-                self._hit_handlers[key].call(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.type)
+                self._hit_handlers[key](block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.type)
             if (-1,-1,-1,-1) in self._hit_handlers and callable(self._hit_handlers[(-1,-1,-1,-1)]):
-                self._hit_handlers[(-1,-1,-1,-1)].call(block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.type)
+                self._hit_handlers[(-1,-1,-1,-1)](block_hit.pos.x, block_hit.pos.y, block_hit.pos.z, block_hit.type)
         time.sleep(0.01)
 
 
