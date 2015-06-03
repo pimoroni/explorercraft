@@ -38,7 +38,7 @@ class Singleton:
 @Singleton
 class MinecraftInstanceHandler(minecraft.Minecraft):
     def __init__(self):
-        minecraft.Minecraft.__init__(self, "localhost", 4711)
+        minecraft.Minecraft.__init__(self, minecraft.Connection("localhost", 4711))
         self._hit_handlers = []
 
     def on_hit(self, *args, **kwargs):
