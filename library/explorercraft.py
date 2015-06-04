@@ -127,14 +127,13 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
 
         time.sleep(0.01)
 
-
 class ExplorercraftPlugin():
-    def __init__(mc=None):
+    def __init__(self,mc=None):
         if not mc == None:
             self.mc = mc
         else:
             self.mc = MinecraftInstanceHandler.Instance()
-
+            
 class BarGraph(ExplorercraftPlugin):
     '''Draw a bar-chart style bar with a single stack of blocks
     '''
