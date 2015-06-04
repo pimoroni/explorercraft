@@ -1,24 +1,24 @@
-from mcpi import minecraft, block
+import mcpi.minecraft
 import time
 import threading
 from mcpi.block import *
 
-WOOL        = block.Block(35,0)
-WOOL_ORANGE = block.Block(35,1)
-WOOL_PURPLE = block.Block(35,2)
-WOOL_BLUE   = block.Block(35,3)
-WOOL_YELLOW = block.Block(35,4)
-WOOL_GREEN  = block.Block(35,5)
-WOOL_PINK   = block.Block(35,6)
-WOOL_BLACK  = block.Block(35,7)
-WOOL_GREY   = block.Block(35,8)
-WOOL_LBLUE  = block.Block(35,9)
-WOOL_INDIGO = block.Block(35,10)
-WOOL_DBLUE  = block.Block(35,11)
-WOOL_BROWN  = block.Block(35,12)
-WOOL_DGREEN = block.Block(35,13)
-WOOL_RED    = block.Block(35,14)
-WOOL_BLACK  = block.Block(35,15)
+WOOL        = Block(35,0)
+WOOL_ORANGE = Block(35,1)
+WOOL_PURPLE = Block(35,2)
+WOOL_BLUE   = Block(35,3)
+WOOL_YELLOW = Block(35,4)
+WOOL_GREEN  = Block(35,5)
+WOOL_PINK   = Block(35,6)
+WOOL_BLACK  = Block(35,7)
+WOOL_GREY   = Block(35,8)
+WOOL_LBLUE  = Block(35,9)
+WOOL_INDIGO = Block(35,10)
+WOOL_DBLUE  = Block(35,11)
+WOOL_BROWN  = Block(35,12)
+WOOL_DGREEN = Block(35,13)
+WOOL_RED    = Block(35,14)
+WOOL_BLACK  = Block(35,15)
 
 BLOCK_TOP    = 1
 BLOCK_BOTTOM = 0
@@ -68,9 +68,9 @@ class Singleton:
         return isinstance(inst, self._decorated)
 
 @Singleton
-class MinecraftInstanceHandler(minecraft.Minecraft):
+class MinecraftInstanceHandler(mcpi.minecraft.Minecraft):
     def __init__(self):
-        minecraft.Minecraft.__init__(self, minecraft.Connection("localhost", 4711))
+        mcpi.minecraft.Minecraft.__init__(self, mcpi.minecraft.Connection("localhost", 4711))
         self._hit_handlers = {}
         self._hit_polling = None
 
@@ -78,7 +78,7 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
         x = kwargs.get('x', -1)
         y = kwargs.get('y', -1)
         z = kwargs.get('z', -1)
-        block_type = kwargs.get('block_type', block.Block(-1,-1))
+        block_type = kwargs.get('block_type', Block(-1,-1))
         face    = kwargs.get('face', -1)
         handler = kwargs.get('handler', None)
 
@@ -92,7 +92,7 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
             self._hit_polling.start()
 
     def _match_key(self, src, tgt):
-        if src == tgt or src == -1 or src == block.Block(-1,-1):
+        if src == tgt or src == -1 or src == Block(-1,-1):
             return True
         return False
 
@@ -109,7 +109,7 @@ class MinecraftInstanceHandler(minecraft.Minecraft):
         return matching_handlers
 
     def _poll(self):
-        key_all = (-1,-1,-1,block.Block(-1,-1),-1)
+        key_all = (-1,-1,-1,Block(-1,-1),-1)
         block_hits = self.events.pollBlockHits()
         #self.events.clearAll()
         for block_hit in block_hits:
@@ -133,14 +133,14 @@ class ExplorercraftPlugin():
             self.mc = mc
         else:
             self.mc = MinecraftInstanceHandler.Instance()
-            
+
 class BarGraph(ExplorercraftPlugin):
     '''Draw a bar-chart style bar with a single stack of blocks
     '''
     def __init__(self, x, y, z, height, max_value, block_style, mc=None):
         ExplorercraftPlugin.__init__(self,mc)
 
-        self.position = minecraft.Vec3(x,y,z)
+        self.position = mcpi.minecraft.Vec3(x,y,z)
         self.height = height
         self.block_style = block_style
         self.max_value = max_value
@@ -164,7 +164,7 @@ class BarGraph(ExplorercraftPlugin):
             self.position.z,
             self.position.x,
             self.position.y + self.height,
-            block.AIR
+            AIR
             )
         self.mc.setBlocks(
             self.position.x,
@@ -206,7 +206,7 @@ class Thermometer(BarGraph):
             self.position.x + 3,
             self.position.y - 30,
             self.position.z + 3,
-            block.OBSIDIAN
+            OBSIDIAN
             )
 
         # Draw a platform in the air for the player to stand on
@@ -217,7 +217,7 @@ class Thermometer(BarGraph):
             self.position.x + 3,
             self.position.y - 1,
             self.position.z - 30 + 3,
-            block.WOOD_PLANKS
+            WOOD_PLANKS
         )
 
         self.mc.setBlocks(
@@ -227,7 +227,7 @@ class Thermometer(BarGraph):
             self.position.x + 3,
             self.position.y,
             self.position.z - 30 + 3,
-            block.FENCE
+            FENCE
         )
 
         self.mc.setBlocks(
@@ -237,7 +237,7 @@ class Thermometer(BarGraph):
             self.position.x + 2,
             self.position.y,
             self.position.z - 30 + 2,
-            block.AIR
+            AIR
         )
     
 class Elevator(ExplorercraftPlugin):
